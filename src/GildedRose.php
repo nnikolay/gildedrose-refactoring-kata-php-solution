@@ -4,36 +4,23 @@ declare(strict_types=1);
 
 namespace GildedRose;
 
-use GildedRose\UpdateStrategy\AgedBrieUpdateStrategy;
-use GildedRose\UpdateStrategy\BackstagePassUpdateStrategy;
-use GildedRose\UpdateStrategy\ConjuredUpdateStrategy;
-use GildedRose\UpdateStrategy\DefaultUpdateStrategy;
-use GildedRose\UpdateStrategy\SulfurasUpdateStrategy;
+use GildedRose\Service\ItemUpdater;
 
 class GildedRose
 {
-    private array $strategies;
+    private ItemUpdater $itemUpdater;
 
     public function __construct(
         private array $items,
         array $customStrategies = []
     ) {
-        $defaultStrategies = [
-            'Aged Brie' => new AgedBrieUpdateStrategy(),
-            'Backstage passes to a TAFKAL80ETC concert' => new BackstagePassUpdateStrategy(),
-            'Sulfuras, Hand of Ragnaros' => new SulfurasUpdateStrategy(),
-            'Conjured Mana Cake' => new ConjuredUpdateStrategy(),
-            'default' => new DefaultUpdateStrategy(),
-        ];
-
-        $this->strategies = array_merge($defaultStrategies, $customStrategies);
+        $this->itemUpdater = new ItemUpdater($customStrategies);
     }
 
     public function updateQuality(): void
     {
         foreach ($this->items as $item) {
-            $strategy = $this->strategies[$item->name] ?? $this->strategies['default'];
-            $strategy->update($item);
+            $this->itemUpdater->updateItem($item);
         }
     }
 }
